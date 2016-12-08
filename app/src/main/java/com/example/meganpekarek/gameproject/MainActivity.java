@@ -3,6 +3,7 @@ package com.example.meganpekarek.gameproject;
 //import android.app.Fragment;
 import android.content.Context;
 import android.net.Uri;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     TextView trivia;
     TextView mission;
     TextView directions;
+    TextView timer;
     ImageView house;
     ImageView house2;
     ImageView house3;
@@ -118,6 +121,22 @@ public class MainActivity extends AppCompatActivity {
     public void init() {
         items = 0;
         points = 50;
+        timer = (TextView) findViewById(R.id.timer);
+
+        new CountDownTimer(60000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                timer.setText(""+String.format("%d min %d sec",
+                        TimeUnit.MILLISECONDS.toMinutes( millisUntilFinished),
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) -
+                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished))));
+            }
+
+            public void onFinish() {
+                timer.setText("done!");
+                results(points);
+            }
+        }.start();
 
         btn1 = (Button) findViewById(R.id.btn1);
         btn1.setText(list.get(value).getAnswerRight());
@@ -151,29 +170,30 @@ public class MainActivity extends AppCompatActivity {
         if(this.points <= 0) {
             results(this.points);
         }
-        if(this.points > 80 && this.points <100) {
+        if(correct >= 3 && correct < 5) {
             items = 1;
             house = (ImageView) findViewById(R.id.house_one);
             house.setImageResource(R.drawable.house_one);
-            String text = result + " " + "Items: " + itemString[items] +" " + "Score: " + points + "\n" + question;
+            String text = result + "\n" + "You now have access to: " + itemString[items] +"\n" + "Score: " + points + "\n" + question;
             trivia.setGravity(Gravity.CENTER);
             this.trivia.setText(text);
         }
-        else if(this.points >= 100 && this.points < 120) {
+        else if(correct >= 5 && correct < 7) {
             items = 2;
             house2 = (ImageView) findViewById(R.id.house_two);
             house2.setImageResource(R.drawable.house_two);
-            String text = result + " " + "Items: " + itemString[items-1] +" " + itemString[items] + " " + "Score: " + points + "\n" + question;
+            String text = result + " " + "You now have access to: " + itemString[items-1] +" and " + itemString[items] + "\n" + "Score: " + points + "\n" + question;
             trivia.setGravity(Gravity.CENTER);
             this.trivia.setText(text);
         }
-        else if(this.points >= 120 && this.points < 140) {
+        else if(correct >= 7) {
             items = 3;
             house3 = (ImageView) findViewById(R.id.house_three);
             house3.setImageResource(R.drawable.house_three);
-            String text = result + " " + "Items: " + itemString[items-2] +" " + itemString[items-1] + " " +itemString[items] + " " + "Score: " + points + "\n" + question;
+            String text = result + " " + "Items: " + itemString[items-2] +", " + itemString[items-1] + " and " +itemString[items] + "\n" + "Score: " + points + "\n" + question;
             trivia.setGravity(Gravity.CENTER);
             this.trivia.setText(text);
+            results(points);
         }
         else {
             String text = result + " " + "Score: " + points + "\n" + question;
@@ -270,6 +290,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             this.points = points - list.get(value).getPointChange();
             result = "InCorrect!";
+            incorrect++;
         }
         if (i <= 9) {
             if (value < list.size()) {
